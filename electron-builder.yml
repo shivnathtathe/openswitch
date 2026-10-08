@@ -1,0 +1,47 @@
+appId: com.openswitch.desktop
+productName: OpenSwitch
+copyright: Copyright (c) 2026 Shivnath Tathe
+directories:
+  output: release
+files:
+  - dist/**/*
+  - package.json
+extraResources:
+  - from: vendor/openvpn/NOTICE.md
+    to: openvpn/NOTICE.md
+  - from: resources/icons
+    to: icons
+asar: true
+asarUnpack:
+  - node_modules/keytar/**/*
+npmRebuild: true
+publish: null
+win:
+  icon: resources/icons/app.ico
+  forceCodeSigning: false
+  signAndEditExecutable: true
+  verifyUpdateCodeSignature: true
+  signtoolOptions:
+    publisherName: Shivnath Tathe
+  requestedExecutionLevel: requireAdministrator
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-${arch}.${ext}
+nsis:
+  include: build/installer.nsh
+  installerSidebar: build/installer-sidebar.bmp
+  installerHeader: build/installer-header.bmp
+  installerIcon: resources/icons/app.ico
+  uninstallerIcon: resources/icons/app.ico
+  oneClick: false
+  perMachine: true
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: OpenSwitch
+  uninstallDisplayName: OpenSwitch
+  deleteAppDataOnUninstall: false
+  runAfterFinish: true

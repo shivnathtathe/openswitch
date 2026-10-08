@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" role="img" aria-labelledby="title desc">
+  <title id="title">OpenSwitch error</title>
+  <desc id="desc">High-contrast Windows tray icon: Error</desc>
+  <path d="M3 5h7.25A2.75 2.75 0 0 1 13 7.75 2.75 2.75 0 0 1 10.25 10.5H9.5" fill="none" stroke="#111417" stroke-width="3.25" stroke-linecap="round"/>
+  <circle cx="5" cy="10.5" r="2.35" fill="#111417"/>
+  <path d="M3 5h7.25A2.75 2.75 0 0 1 13 7.75 2.75 2.75 0 0 1 10.25 10.5H9.5" fill="none" stroke="#FFFFFF" stroke-width="1.65" stroke-linecap="round"/>
+  <circle cx="5" cy="10.5" r="1.35" fill="#FFFFFF"/>
+  <circle cx="12" cy="12.5" r="3.5" fill="#111417"/>
+  <circle cx="12" cy="12.5" r="2.7" fill="#FFFFFF"/>
+  <circle cx="12" cy="12.5" r="1.95" fill="#111417"/>
+  <path d="m10.8 11.3 2.4 2.4m0-2.4-2.4 2.4" fill="none" stroke="#FFFFFF" stroke-width="1.05" stroke-linecap="round"/>
+</svg>

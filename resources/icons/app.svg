@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">OpenSwitch application icon</title>
+  <desc id="desc">An open electrical switch within a current loop on a carbon field</desc>
+  <rect width="256" height="256" rx="56" fill="#111417"/>
+  <rect x="5" y="5" width="246" height="246" rx="51" fill="none" stroke="#30373E" stroke-width="2"/>
+  <path d="M64 80h94c26 0 42 18 42 47s-16 47-42 47h-47" fill="none" stroke="#35C987" stroke-width="22" stroke-linecap="round"/>
+  <circle cx="74" cy="174" r="22" fill="#F2F5F7"/>
+  <path d="m88 160 39-39" fill="none" stroke="#F2F5F7" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="145" cy="103" r="9" fill="#35C987"/>
+</svg>

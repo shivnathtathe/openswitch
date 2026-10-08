@@ -1,0 +1,50 @@
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+html[data-theme='light'] {
+  color-scheme: light;
+  color: #182027;
+  background: #f4f6f7;
+  --carbon: #f4f6f7;
+  --graphite: #ffffff;
+  --mist: #5c6973;
+  --signal: #182027;
+  --current: #087a50;
+  --fault: #b42318;
+  --line: #cbd2d7;
+  --muted-line: #dfe4e7;
+}
+
+html[data-theme='light'] .profile-row:hover {
+  background: #edf1f3;
+}
+
+html[data-theme='light'] .profile-row__credentials,
+html[data-theme='light'] .field__input:disabled {
+  color: #65737d;
+}
+
+html[data-theme='light'] .button:hover:not(:disabled),
+html[data-theme='light'] .icon-button:hover {
+  background: #e5eaed;
+}
+
+html[data-theme='light'] .connection-error pre,
+html[data-theme='light'] .dialog,
+html[data-theme='light'] .field__input,
+html[data-theme='light'] .path-field__control {
+  border-color: #aeb8bf;
+}
+
+html[data-theme='light'] .dialog {
+  box-shadow: 0 24px 80px rgb(38 48 56 / 0.2);
+}
+
+html[data-theme='light'] .dialog::backdrop {
+  background: rgb(36 44 50 / 0.42);
+}
+
+html[data-theme='light'] .toast {
+  box-shadow: 0 16px 48px rgb(38 48 56 / 0.16);
+}

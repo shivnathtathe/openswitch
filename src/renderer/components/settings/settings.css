@@ -1,0 +1,173 @@
+.settings-dialog {
+  width: min(600px, calc(100vw - 32px));
+}
+
+.settings-theme {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 24px;
+  align-items: center;
+  margin: 0;
+  padding: 0 0 24px;
+  border: 0;
+}
+
+.settings-theme__label {
+  padding: 0;
+  color: var(--signal);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.settings-theme__description {
+  max-width: 48ch;
+  margin: 0;
+  color: var(--mist);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.settings-theme__control {
+  display: grid;
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 3px;
+  border: 1px solid var(--line);
+  background: var(--carbon);
+}
+
+.settings-theme__option {
+  cursor: pointer;
+}
+
+.settings-theme__option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.settings-theme__option span {
+  display: grid;
+  min-width: 64px;
+  min-height: 34px;
+  padding: 0 10px;
+  place-items: center;
+  color: var(--mist);
+  font-size: 12px;
+  font-weight: 650;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.settings-theme__option:hover span {
+  color: var(--signal);
+}
+
+.settings-theme__option input:checked + span {
+  background: var(--current);
+  color: var(--carbon);
+}
+
+.settings-theme__option input:focus-visible + span {
+  outline: 2px solid var(--current);
+  outline-offset: 2px;
+}
+
+.settings-theme:disabled .settings-theme__option {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.settings-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.settings-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 24px;
+  align-items: center;
+  min-height: 88px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.settings-option:hover .settings-option__label {
+  color: var(--current);
+}
+
+.settings-option__copy {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-option__label {
+  color: var(--signal);
+  font-size: 14px;
+  font-weight: 650;
+  transition: color 160ms ease;
+}
+
+.settings-option__description {
+  max-width: 48ch;
+  color: var(--mist);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.settings-option__input {
+  width: 20px;
+  height: 20px;
+  margin: 0 4px;
+  accent-color: var(--current);
+  cursor: pointer;
+}
+
+.settings-list:disabled .settings-option,
+.settings-list:disabled .settings-option__input {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.settings-dialog__status,
+.settings-dialog__error {
+  margin: 16px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.settings-dialog__status {
+  color: var(--mist);
+}
+
+.settings-dialog__error {
+  color: var(--fault);
+}
+
+@media (max-width: 480px) {
+  .settings-theme {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-theme__control {
+    grid-row: auto;
+    grid-column: 1;
+    margin-top: 10px;
+  }
+
+  .settings-theme__option span {
+    min-width: 0;
+  }
+
+  .settings-option {
+    gap: 16px;
+  }
+}

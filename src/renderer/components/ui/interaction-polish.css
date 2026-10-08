@@ -1,0 +1,85 @@
+.profile-row__details {
+  min-width: 0;
+}
+
+.profile-row__heading {
+  min-width: 0;
+}
+
+.profile-row__name {
+  min-width: 0;
+}
+
+.profile-status-wrap {
+  flex: 0 0 auto;
+  min-width: 0;
+  max-width: min(240px, 40vw);
+}
+
+.profile-status-wrap .technical-details {
+  margin-top: 6px;
+}
+
+.profile-actions {
+  display: grid;
+  grid-template-columns: minmax(104px, auto) 52px 60px;
+}
+
+.profile-actions > .button {
+  width: 100%;
+}
+
+.technical-details {
+  color: var(--mist);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.technical-details summary {
+  width: fit-content;
+  color: var(--mist);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+
+.technical-details summary:hover,
+.technical-details summary:focus-visible {
+  color: var(--signal);
+  text-decoration-color: currentColor;
+}
+
+.technical-details__content {
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+  color: var(--mist);
+  font-family: Consolas, 'SFMono-Regular', monospace;
+  font-size: 11px;
+}
+
+.toast__summary {
+  color: var(--signal);
+}
+
+.toast .technical-details {
+  margin-top: 2px;
+}
+
+.delete-profile-dialog__name {
+  overflow-wrap: anywhere;
+}
+
+.delete-profile-dialog__confirmation {
+  margin-top: 20px;
+}
+
+.dialog[aria-busy='true'] {
+  cursor: wait;
+}
+
+@media (max-width: 680px) {
+  .profile-actions {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+}

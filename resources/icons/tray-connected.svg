@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" role="img" aria-labelledby="title desc">
+  <title id="title">OpenSwitch connected</title>
+  <desc id="desc">High-contrast Windows tray icon: Connected</desc>
+  <path d="M3 5h7.25A2.75 2.75 0 0 1 13 7.75 2.75 2.75 0 0 1 10.25 10.5H9.5" fill="none" stroke="#111417" stroke-width="3.25" stroke-linecap="round"/>
+  <circle cx="5" cy="10.5" r="2.35" fill="#111417"/>
+  <path d="m5.8 9.8 4.35-4.15" fill="none" stroke="#111417" stroke-width="3.25" stroke-linecap="round"/>
+  <path d="M3 5h7.25A2.75 2.75 0 0 1 13 7.75 2.75 2.75 0 0 1 10.25 10.5H9.5" fill="none" stroke="#FFFFFF" stroke-width="1.65" stroke-linecap="round"/>
+  <circle cx="5" cy="10.5" r="1.35" fill="#FFFFFF"/>
+  <path d="m5.8 9.8 4.35-4.15" fill="none" stroke="#FFFFFF" stroke-width="1.65" stroke-linecap="round"/>
+</svg>
