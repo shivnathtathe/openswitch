@@ -4,6 +4,14 @@
 
 OpenSwitch is a focused Windows desktop client for importing OpenVPN profiles, switching connections, and monitoring tunnel state from one application and the system tray.
 
+## Download
+
+Download the latest precompiled Windows x64 installer:
+
+**[Download OpenSwitch 0.2.0 for Windows](https://github.com/shivnathtathe/openswitch/releases/download/v0.2.0/OpenSwitch-0.2.0-x64.exe)**
+
+You can also browse [all releases](https://github.com/shivnathtathe/openswitch/releases). The installer is currently unsigned, so Windows may display an unrecognized publisher warning.
+
 ## Features
 
 - Import, edit, connect, disconnect, and remove local `.ovpn` profiles.
