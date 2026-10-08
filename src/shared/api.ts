@@ -1,6 +1,9 @@
 import type {
   AppSettings,
   AppResult,
+  BundleExportResult,
+  BundleImportPreview,
+  BundleImportResult,
   ConfigFileSelection,
   ConnectionState,
   CreateVpnProfileInput,
@@ -16,6 +19,13 @@ export interface OpenSwitchProfileApi {
   update(profileId: VpnProfileId, input: UpdateVpnProfileInput): Promise<AppResult<VpnProfile>>
   remove(profileId: VpnProfileId): Promise<AppResult<void>>
   selectConfigFile(): Promise<AppResult<ConfigFileSelection | null>>
+  selectBundleForImport(): Promise<AppResult<BundleImportPreview | null>>
+  importBundle(
+    sessionId: string,
+    profileKeys: readonly string[],
+  ): Promise<AppResult<BundleImportResult>>
+  discardBundleImport(sessionId: string): Promise<AppResult<void>>
+  exportBundle(profileIds: readonly VpnProfileId[]): Promise<AppResult<BundleExportResult | null>>
 }
 
 export type ConnectionStateListener = (state: ConnectionState) => void

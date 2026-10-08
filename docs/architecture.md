@@ -13,9 +13,9 @@ OpenSwitch uses Electron with a React renderer and separates UI code from operat
 ## Data flow
 
 1. The user imports or selects a profile in the renderer.
-2. The main process validates the profile fields and stores the original `.ovpn` path plus metadata. It does not copy the profile.
+2. For standalone `.ovpn` files, the main process validates profile fields and stores the original path. For `.osch`, it validates a bounded ZIP, previews through an opaque session, stages selected isolated subtrees under user data, and atomically appends their metadata.
 3. The username is stored with profile metadata. The password, when supplied, is written through `keytar` to the OS credential store.
-4. A connect request opens a one-client loopback management channel, then spawns OpenVPN directly without a command shell.
+4. A connect request opens a one-client loopback management channel, then spawns OpenVPN directly without a command shell. `--cd` points at the profile configuration directory so relative dependencies resolve deterministically.
 5. Parsed state changes are sent to the renderer and reflected by the tray icon/menu.
 6. Disconnect requests close the management channel and terminate the owned OpenVPN process. Shutdown follows the same disconnect path.
 

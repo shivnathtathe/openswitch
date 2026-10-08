@@ -102,4 +102,48 @@ describe('profilesStore action state', () => {
 
     expect(store.getProfilesSnapshot().profiles[0]?.name).toBe('Newer response')
   })
+
+  it('replaces local profiles with the authoritative import result', async () => {
+    const importedProfile = { ...profile, id: 'profile-imported', name: 'Imported VPN' }
+    const importBundle = vi.fn().mockResolvedValue({
+      ok: true,
+      value: { importedCount: 1, profiles: [importedProfile] },
+    })
+    getOpenSwitchApi.mockReturnValue({ profiles: { importBundle } })
+    const store = await importStore()
+
+    const result = await store.importBundle('session-1', ['office'])
+
+    expect(importBundle).toHaveBeenCalledWith('session-1', ['office'])
+    expect(result?.importedCount).toBe(1)
+    expect(store.getProfilesSnapshot().profiles).toEqual([importedProfile])
+    expect(store.getProfilesSnapshot().isMutating).toBe(false)
+  })
+
+  it('forwards preview discard and export operations to the profile API', async () => {
+    const preview = {
+      sessionId: 'session-1',
+      fileName: 'team.osch',
+      profiles: [],
+    }
+    const selectBundleForImport = vi.fn().mockResolvedValue({ ok: true, value: preview })
+    const discardBundleImport = vi.fn().mockResolvedValue({ ok: true, value: undefined })
+    const exportBundle = vi.fn().mockResolvedValue({
+      ok: true,
+      value: { exportedCount: 1, fileName: 'team.osch' },
+    })
+    getOpenSwitchApi.mockReturnValue({
+      profiles: { selectBundleForImport, discardBundleImport, exportBundle },
+    })
+    const store = await importStore()
+
+    await expect(store.selectBundleForImport()).resolves.toEqual(preview)
+    await expect(store.discardBundleImport('session-1')).resolves.toBe(true)
+    await expect(store.exportBundle([profile.id])).resolves.toEqual({
+      exportedCount: 1,
+      fileName: 'team.osch',
+    })
+    expect(discardBundleImport).toHaveBeenCalledWith('session-1')
+    expect(exportBundle).toHaveBeenCalledWith([profile.id])
+  })
 })

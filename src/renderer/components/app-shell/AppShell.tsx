@@ -5,6 +5,11 @@ interface AppShellProps {
   connection: ReactNode
   profileCount: number
   onAddProfile: () => void
+  onImportProfiles?: () => void
+  onExportProfiles?: () => void
+  profileActionsDisabled?: boolean
+  importingProfiles?: boolean
+  exportingProfiles?: boolean
   onOpenSettings?: () => void
 }
 
@@ -13,6 +18,11 @@ export function AppShell({
   connection,
   profileCount,
   onAddProfile,
+  onImportProfiles,
+  onExportProfiles,
+  profileActionsDisabled = false,
+  importingProfiles = false,
+  exportingProfiles = false,
   onOpenSettings,
 }: AppShellProps) {
   return (
@@ -56,12 +66,43 @@ export function AppShell({
                 <p className="eyebrow">Your connections</p>
                 <h1>VPN profiles</h1>
               </div>
-              <button className="add-profile-button" type="button" onClick={onAddProfile}>
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                Add profile
-              </button>
+              <div className="workspace__actions">
+                <button
+                  className="workspace-action-button"
+                  type="button"
+                  onClick={onImportProfiles}
+                  disabled={profileActionsDisabled}
+                  aria-busy={importingProfiles || undefined}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" />
+                  </svg>
+                  {importingProfiles ? 'Opening...' : 'Import'}
+                </button>
+                <button
+                  className="workspace-action-button"
+                  type="button"
+                  onClick={onExportProfiles}
+                  disabled={profileActionsDisabled || profileCount === 0}
+                  aria-busy={exportingProfiles || undefined}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 16V5m0 0 4 4m-4-4-4 4M5 19h14" />
+                  </svg>
+                  {exportingProfiles ? 'Saving...' : 'Export'}
+                </button>
+                <button
+                  className="add-profile-button"
+                  type="button"
+                  onClick={onAddProfile}
+                  disabled={profileActionsDisabled}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  Add profile
+                </button>
+              </div>
             </header>
             {children}
           </main>

@@ -4,6 +4,9 @@ import type {
   AppResult,
   AppSettings,
   AppearanceTheme,
+  BundleExportResult,
+  BundleImportPreview,
+  BundleImportResult,
   ConfigFileSelection,
   ConnectionState,
   CreateVpnProfileInput,
@@ -18,6 +21,10 @@ export interface IpcActions {
   createProfile(input: CreateVpnProfileInput): Promise<VpnProfile>
   updateProfile(profileId: string, input: UpdateVpnProfileInput): Promise<VpnProfile>
   removeProfile(profileId: string): Promise<void>
+  previewBundle(filePath: string): Promise<BundleImportPreview>
+  importBundle(sessionId: string, profileKeys: readonly string[]): Promise<BundleImportResult>
+  discardBundleImport(sessionId: string): void
+  exportBundle(profileIds: readonly string[], destinationPath: string): Promise<BundleExportResult>
   connect(profileId: string): Promise<ConnectionState>
   disconnect(): Promise<ConnectionState>
   getState(): ConnectionState
@@ -64,6 +71,18 @@ function assertTrustedSender(event: IpcMainInvokeEvent): void {
 function validateId(value: unknown): asserts value is string {
   if (typeof value !== 'string' || !value.trim() || value.length > 128) {
     throw new TypeError('A valid profile ID is required.')
+  }
+}
+
+function validateIdList(value: unknown, label: string): asserts value is string[] {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 100) {
+    throw new TypeError(`${label} must contain between 1 and 100 items.`)
+  }
+  const values = new Set<string>()
+  for (const item of value) {
+    validateId(item)
+    if (values.has(item)) throw new TypeError(`${label} must not contain duplicates.`)
+    values.add(item)
   }
 }
 
@@ -153,6 +172,32 @@ async function chooseOvpnFile(event: IpcMainInvokeEvent): Promise<ConfigFileSele
   return { path: filePath, fileName: filePath.split(/[\\/]/).pop() ?? filePath }
 }
 
+async function chooseBundleFile(event: IpcMainInvokeEvent): Promise<string | null> {
+  const options: Electron.OpenDialogOptions = {
+    title: 'Import OpenSwitch bundle',
+    properties: ['openFile'],
+    filters: [{ name: 'OpenSwitch profile bundles', extensions: ['osch'] }],
+  }
+  const owner = BrowserWindow.fromWebContents(event.sender)
+  const selection = owner
+    ? await dialog.showOpenDialog(owner, options)
+    : await dialog.showOpenDialog(options)
+  return selection.canceled ? null : (selection.filePaths[0] ?? null)
+}
+
+async function chooseBundleDestination(event: IpcMainInvokeEvent): Promise<string | null> {
+  const options: Electron.SaveDialogOptions = {
+    title: 'Export OpenSwitch bundle',
+    defaultPath: 'OpenSwitch-profiles.osch',
+    filters: [{ name: 'OpenSwitch profile bundles', extensions: ['osch'] }],
+  }
+  const owner = BrowserWindow.fromWebContents(event.sender)
+  const selection = owner
+    ? await dialog.showSaveDialog(owner, options)
+    : await dialog.showSaveDialog(options)
+  return selection.canceled ? null : (selection.filePath ?? null)
+}
+
 export function registerIpcHandlers(actions: IpcActions): () => void {
   ipcMain.handle(IPC_CHANNELS.profiles.list, (event) => {
     assertTrustedSender(event)
@@ -177,6 +222,35 @@ export function registerIpcHandlers(actions: IpcActions): () => void {
   ipcMain.handle(IPC_CHANNELS.profiles.selectConfigFile, (event) => {
     assertTrustedSender(event)
     return result(() => chooseOvpnFile(event))
+  })
+  ipcMain.handle(IPC_CHANNELS.profiles.selectBundleForImport, (event) => {
+    assertTrustedSender(event)
+    return result(async () => {
+      const selected = await chooseBundleFile(event)
+      return selected ? actions.previewBundle(selected) : null
+    })
+  })
+  ipcMain.handle(
+    IPC_CHANNELS.profiles.importBundle,
+    (event, sessionId: unknown, profileKeys: unknown) => {
+      assertTrustedSender(event)
+      validateId(sessionId)
+      validateIdList(profileKeys, 'Profile keys')
+      return result(() => actions.importBundle(sessionId, profileKeys))
+    },
+  )
+  ipcMain.handle(IPC_CHANNELS.profiles.discardBundleImport, (event, sessionId: unknown) => {
+    assertTrustedSender(event)
+    validateId(sessionId)
+    return result(() => actions.discardBundleImport(sessionId))
+  })
+  ipcMain.handle(IPC_CHANNELS.profiles.exportBundle, (event, profileIds: unknown) => {
+    assertTrustedSender(event)
+    validateIdList(profileIds, 'Profile IDs')
+    return result(async () => {
+      const destination = await chooseBundleDestination(event)
+      return destination ? actions.exportBundle(profileIds, destination) : null
+    })
   })
   ipcMain.handle(IPC_CHANNELS.settings.get, (event) => {
     assertTrustedSender(event)
@@ -220,6 +294,10 @@ export function registerIpcHandlers(actions: IpcActions): () => void {
     IPC_CHANNELS.profiles.update,
     IPC_CHANNELS.profiles.remove,
     IPC_CHANNELS.profiles.selectConfigFile,
+    IPC_CHANNELS.profiles.selectBundleForImport,
+    IPC_CHANNELS.profiles.importBundle,
+    IPC_CHANNELS.profiles.discardBundleImport,
+    IPC_CHANNELS.profiles.exportBundle,
     IPC_CHANNELS.settings.get,
     IPC_CHANNELS.settings.update,
     IPC_CHANNELS.settings.setTheme,

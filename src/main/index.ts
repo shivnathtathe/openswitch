@@ -44,6 +44,7 @@ export function adaptMainServices(
   const createRaw = requireMethod(profiles, ['create', 'createProfile'], 'ProfileStore')
   const updateRaw = requireMethod(profiles, ['update', 'updateProfile'], 'ProfileStore')
   const removeRaw = requireMethod(profiles, ['remove', 'removeProfile'], 'ProfileStore')
+  const importManyRaw = requireMethod(profiles, ['createMany'], 'ProfileStore')
   const getSecret = requireMethod(
     vault,
     ['get', 'getCredentials', 'getForProfile'],
@@ -159,6 +160,44 @@ export function adaptMainServices(
           if (typeof previousSecret === 'string') await saveSecret(id, previousSecret)
           throw error
         }
+      },
+      getBundleProfiles: async (profileIds) => {
+        const all = (await listRaw()) as UnknownRecord[]
+        return profileIds.map((id) => {
+          const raw = all.find((profile) => profile.id === id)
+          if (!raw) throw new Error(`Profile not found: ${id}`)
+          return {
+            id,
+            name: String(raw.name),
+            configFilePath: String(raw.configFilePath ?? raw.ovpnPath ?? ''),
+            username: String(raw.username ?? ''),
+          }
+        })
+      },
+      importBundleProfiles: async (inputs) => {
+        const raw = (await importManyRaw(
+          inputs.map((input) => ({
+            id: input.id,
+            name: input.name,
+            ovpnPath: input.configFilePath,
+            username: input.username,
+          })),
+        )) as UnknownRecord[]
+        return raw.map((profile) => {
+          const configFilePath = String(profile.ovpnPath ?? profile.configFilePath ?? '')
+          return {
+            id: String(profile.id),
+            name: String(profile.name),
+            configFilePath,
+            configFileName: path.basename(configFilePath),
+            credentials: {
+              usernameConfigured: Boolean(profile.username),
+              passwordConfigured: false,
+            },
+            createdAt: String(profile.createdAt),
+            updatedAt: String(profile.updatedAt),
+          }
+        })
       },
     },
     credentials: {

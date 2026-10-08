@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import { AppShell } from './components/app-shell'
 import { ConnectionOverview } from './components/connection'
-import { AddProfileDialog, DeleteProfileDialog, EditProfileDialog } from './components/dialogs'
+import {
+  AddProfileDialog,
+  DeleteProfileDialog,
+  EditProfileDialog,
+  ExportBundleDialog,
+  ImportBundleDialog,
+} from './components/dialogs'
 import {
   ProfileList,
   toCreateVpnProfileInput,
@@ -12,6 +18,7 @@ import {
 import { SettingsDialog } from './components/settings'
 import { Button, Toast, ToastRegion } from './components/ui'
 import { useConnectionState, useProfiles } from './hooks'
+import type { BundleImportPreview } from './state/types'
 
 type DialogState =
   | { type: 'closed' }
@@ -24,6 +31,12 @@ export function App() {
   const connection = useConnectionState()
   const [dialog, setDialog] = useState<DialogState>({ type: 'closed' })
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [importPreview, setImportPreview] = useState<BundleImportPreview | null>(null)
+  const [selectingImport, setSelectingImport] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const activeProfile = profilesState.profiles.find(
     (profile) => profile.id === connection.profileId,
@@ -56,10 +69,56 @@ export function App() {
     if (deleted) setDialog({ type: 'closed' })
   }
 
+  async function handleSelectBundle() {
+    setSuccessMessage(null)
+    setSelectingImport(true)
+    const preview = await profilesState.selectBundleForImport()
+    setSelectingImport(false)
+    if (preview) setImportPreview(preview)
+  }
+
+  async function handleCloseImport() {
+    if (!importPreview || importing) return
+    const sessionId = importPreview.sessionId
+    setImportPreview(null)
+    await profilesState.discardBundleImport(sessionId)
+  }
+
+  async function handleImport(profileKeys: readonly string[]) {
+    if (!importPreview) return
+    setImporting(true)
+    const result = await profilesState.importBundle(importPreview.sessionId, profileKeys)
+    setImporting(false)
+    setImportPreview(null)
+    if (!result) return
+    setSuccessMessage(
+      `${result.importedCount} ${result.importedCount === 1 ? 'profile' : 'profiles'} imported. Passwords were not imported.`,
+    )
+  }
+
+  async function handleExport(profileIds: readonly string[]) {
+    setExporting(true)
+    const result = await profilesState.exportBundle(profileIds)
+    setExporting(false)
+    if (!result) return
+    setExportOpen(false)
+    setSuccessMessage(
+      `${result.exportedCount} ${result.exportedCount === 1 ? 'profile' : 'profiles'} exported to ${result.fileName}.`,
+    )
+  }
+
   return (
     <AppShell
       profileCount={profilesState.profiles.length}
       onAddProfile={() => setDialog({ type: 'add' })}
+      onImportProfiles={() => void handleSelectBundle()}
+      onExportProfiles={() => {
+        setSuccessMessage(null)
+        setExportOpen(true)
+      }}
+      profileActionsDisabled={profilesState.isMutating}
+      importingProfiles={selectingImport}
+      exportingProfiles={exporting}
       onOpenSettings={() => setSettingsOpen(true)}
       connection={
         <ConnectionOverview
@@ -129,8 +188,26 @@ export function App() {
         deleting={Boolean(deleteProfile && profilesState.pendingProfileIds.has(deleteProfile.id))}
       />
       <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <ImportBundleDialog
+        preview={importPreview}
+        onClose={() => void handleCloseImport()}
+        onImport={handleImport}
+        importing={importing}
+      />
+      <ExportBundleDialog
+        open={exportOpen}
+        profiles={profilesState.profiles}
+        onClose={() => setExportOpen(false)}
+        onExport={handleExport}
+        exporting={exporting}
+      />
 
       <ToastRegion>
+        {successMessage ? (
+          <Toast tone="success" onDismiss={() => setSuccessMessage(null)}>
+            {successMessage}
+          </Toast>
+        ) : null}
         {profilesState.error && profilesState.profiles.length > 0 ? (
           <Toast tone="error" onDismiss={profilesState.clearError} duration={0}>
             <strong>Profile action failed</strong>

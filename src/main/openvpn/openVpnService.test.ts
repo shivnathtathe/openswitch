@@ -64,7 +64,7 @@ function createHarness(
 ) {
   const processFactory: ProcessFactory = {
     spawn: (_executable, args) => {
-      eventLog.push(`spawn:${args[1]}`)
+      eventLog.push(`spawn:${args[args.indexOf('--config') + 1]}`)
       const process = processes.shift()
       if (!process) throw new Error('No fake process available')
       return process
@@ -221,6 +221,8 @@ describe('OpenVpnService', () => {
 
     expect(channel.commands).toEqual(['state on', 'hold release'])
     expect(argsSeen[0]).toEqual([
+      '--cd',
+      '.',
       '--config',
       'office.ovpn',
       '--script-security',
@@ -241,6 +243,22 @@ describe('OpenVpnService', () => {
     ])
     channel.receive('>STATE:1,CONNECTED,SUCCESS,10.0.0.2,server,1194,')
     await connected
+  })
+
+  it('reports static authentication challenges instead of ignoring the credential prompt', async () => {
+    const process = new FakeProcess()
+    const { service, channels } = createHarness([process])
+    const connected = service.connect(
+      { id: 'office', configPath: 'office.ovpn' },
+      { username: 'alice', password: 'secret' },
+    )
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    channels[0].receive(">PASSWORD:Need 'Auth' username/password SC:1,Enter token PIN")
+
+    await expect(connected).rejects.toThrow('interactive authentication challenge')
+    expect(channels[0].commands).toEqual(['state on', 'hold release', 'signal SIGTERM'])
+    expect(service.getState()).toMatchObject({ status: 'error', error: { kind: 'auth' } })
   })
 
   it('rejects credentials that cannot be represented as one management command', async () => {

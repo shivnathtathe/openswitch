@@ -1,4 +1,5 @@
 import { EventEmitter } from 'node:events'
+import { dirname } from 'node:path'
 import { parseOpenVpnLogLine, SensitiveDataRedactor } from '../logging'
 import type { LogRedactor, OpenVpnLogEvent } from '../logging'
 import { NodeManagementChannelFactory, quoteManagementValue } from './managementChannel'
@@ -103,6 +104,8 @@ export class OpenVpnService extends EventEmitter<{
         },
       })
       const args = [
+        '--cd',
+        dirname(profile.configPath),
         '--config',
         profile.configPath,
         ...(profile.arguments ?? []),
@@ -240,8 +243,18 @@ export class OpenVpnService extends EventEmitter<{
   private handleManagementLine(session: Session, line: string): void {
     if (this.active?.token !== session.token) return
 
-    const prompt = /^>PASSWORD:Need '([^']+)' username\/password\s*$/i.exec(line)
+    const prompt = /^>PASSWORD:Need '([^']+)' username\/password(?:\s+(.*?))?\s*$/i.exec(line)
     if (prompt) {
+      if (prompt[2]) {
+        this.handleManagementFailure(
+          session,
+          new Error(
+            'This VPN profile requires an interactive authentication challenge that OpenSwitch does not support yet.',
+          ),
+          'auth',
+        )
+        return
+      }
       if (!session.credentials) {
         this.handleManagementFailure(
           session,

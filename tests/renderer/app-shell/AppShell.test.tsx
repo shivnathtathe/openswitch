@@ -33,6 +33,11 @@ describe('AppShell semantics', () => {
         (button) => button.getAttribute('type') === 'button',
       ),
     ).toBe(true)
+    expect(
+      [...document.querySelectorAll('.workspace__actions button')].map(({ textContent }) =>
+        textContent?.trim(),
+      ),
+    ).toEqual(['Import', 'Export', 'Add profile'])
   })
 
   it('exposes the profile count as a single accessible detail', () => {
@@ -44,5 +49,22 @@ describe('AppShell semantics', () => {
     const document = new DOMParser().parseFromString(markup, 'text/html')
 
     expect(document.querySelector('[aria-label="1 local profiles"]')?.textContent).toBe('1profile')
+  })
+
+  it('disables export when there are no profiles', () => {
+    const markup = renderToStaticMarkup(
+      <AppShell connection={null} profileCount={0} onAddProfile={vi.fn()}>
+        Profiles
+      </AppShell>,
+    )
+    const document = new DOMParser().parseFromString(markup, 'text/html')
+    const buttons = [...document.querySelectorAll('.workspace__actions button')]
+
+    expect(
+      buttons.find((button) => button.textContent?.trim() === 'Import')?.hasAttribute('disabled'),
+    ).toBe(false)
+    expect(
+      buttons.find((button) => button.textContent?.trim() === 'Export')?.hasAttribute('disabled'),
+    ).toBe(true)
   })
 })

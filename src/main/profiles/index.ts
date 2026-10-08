@@ -14,6 +14,7 @@ const UNSAFE_DIRECTIVE =
   /^\s*(?:--)?(?:plugin|script-security|up|down|route-up|route-pre-down|ipchange|client-connect|client-disconnect|learn-address|auth-user-pass-verify|tls-verify|config|include)\b/i
 
 export type CreateProfileInput = Pick<Profile, 'name' | 'ovpnPath' | 'username'>
+export type ImportProfileInput = Pick<Profile, 'id' | 'name' | 'ovpnPath' | 'username'>
 
 export type UpdateProfileInput = Partial<
   Pick<Profile, 'name' | 'ovpnPath' | 'username' | 'credentialSaved'>
@@ -86,6 +87,29 @@ export class ProfileStore {
 
     this.store.set('profiles', [...this.store.get('profiles'), profile])
     return toProfile(profile)
+  }
+
+  createMany(inputs: readonly ImportProfileInput[]): Profile[] {
+    const existing = this.store.get('profiles')
+    const ids = new Set(existing.map((profile) => profile.id))
+    const now = new Date().toISOString()
+    const added = inputs.map((input): StoredProfile => {
+      if (typeof input.id !== 'string' || !input.id.trim() || ids.has(input.id)) {
+        throw new Error('Imported profile ID is invalid or duplicated.')
+      }
+      ids.add(input.id)
+      return {
+        id: input.id,
+        name: validateName(input.name),
+        ovpnPath: validateOvpnConfig(input.ovpnPath),
+        username: validateUsername(input.username),
+        credentialSaved: false,
+        createdAt: now,
+        updatedAt: now,
+      }
+    })
+    this.store.set('profiles', [...existing, ...added])
+    return added.map(toProfile)
   }
 
   update(id: string, input: UpdateProfileInput): Profile | undefined {

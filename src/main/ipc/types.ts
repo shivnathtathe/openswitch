@@ -8,12 +8,23 @@ import type {
   VpnProfile,
 } from '../../shared/contracts'
 
+export interface BundleStoredProfile {
+  readonly id: string
+  readonly name: string
+  readonly configFilePath: string
+  readonly username: string
+}
+
+export type BundleProfileImport = BundleStoredProfile
+
 export interface ProfileStorePort {
   list(): Promise<readonly VpnProfile[]>
   get(profileId: string): Promise<VpnProfile | undefined>
   create(input: CreateVpnProfileInput): Promise<VpnProfile>
   update(profileId: string, input: UpdateVpnProfileInput): Promise<VpnProfile>
   remove(profileId: string): Promise<void>
+  getBundleProfiles(profileIds: readonly string[]): Promise<readonly BundleStoredProfile[]>
+  importBundleProfiles(inputs: readonly BundleProfileImport[]): Promise<readonly VpnProfile[]>
 }
 
 export interface CredentialVaultPort {

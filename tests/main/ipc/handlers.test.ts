@@ -8,7 +8,7 @@ const electron = vi.hoisted(() => ({
     }),
     removeHandler: vi.fn((channel: string) => electron.handlers.delete(channel)),
   },
-  dialog: { showOpenDialog: vi.fn() },
+  dialog: { showOpenDialog: vi.fn(), showSaveDialog: vi.fn() },
   BrowserWindow: { fromWebContents: vi.fn() },
 }))
 
@@ -34,6 +34,10 @@ function actions(): IpcActions {
     createProfile: vi.fn(),
     updateProfile: vi.fn(),
     removeProfile: vi.fn(async () => undefined),
+    previewBundle: vi.fn(),
+    importBundle: vi.fn(),
+    discardBundleImport: vi.fn(),
+    exportBundle: vi.fn(),
     connect: vi.fn(),
     disconnect: vi.fn(),
     getState: vi.fn(() => ({ status: 'disconnected', profileId: null })),
@@ -197,5 +201,33 @@ describe('registerIpcHandlers validation', () => {
       ok: false,
       error: { code: 'INTERNAL_ERROR', message: 'database unavailable', retryable: true },
     })
+  })
+
+  it('returns null when bundle open and save dialogs are cancelled', async () => {
+    const service = actions()
+    electron.dialog.showOpenDialog.mockResolvedValue({ canceled: true, filePaths: [] })
+    electron.dialog.showSaveDialog.mockResolvedValue({ canceled: true })
+    registerIpcHandlers(service)
+
+    await expect(
+      electron.handlers.get(IPC_CHANNELS.profiles.selectBundleForImport)?.(trustedEvent()),
+    ).resolves.toEqual({ ok: true, value: null })
+    await expect(
+      electron.handlers.get(IPC_CHANNELS.profiles.exportBundle)?.(trustedEvent(), ['profile-1']),
+    ).resolves.toEqual({ ok: true, value: null })
+    expect(service.previewBundle).not.toHaveBeenCalled()
+    expect(service.exportBundle).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['empty import selection', IPC_CHANNELS.profiles.importBundle, ['session', []]],
+    ['duplicate import keys', IPC_CHANNELS.profiles.importBundle, ['session', ['one', 'one']]],
+    ['empty export selection', IPC_CHANNELS.profiles.exportBundle, [[]]],
+  ])('rejects invalid bundle IPC input: %s', (_label, channel, args) => {
+    const service = actions()
+    registerIpcHandlers(service)
+    expect(() => electron.handlers.get(channel)?.(trustedEvent(), ...args)).toThrow()
+    expect(service.importBundle).not.toHaveBeenCalled()
+    expect(service.exportBundle).not.toHaveBeenCalled()
   })
 })

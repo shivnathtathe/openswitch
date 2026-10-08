@@ -1,6 +1,9 @@
 import type {
   AppSettings,
   AppearanceTheme,
+  BundleExportResult,
+  BundleImportPreview,
+  BundleImportResult,
   ConfigFileSelection,
   ConnectionState,
   CreateVpnProfileInput,
@@ -17,6 +20,10 @@ export const IPC_CHANNELS = {
     update: 'open-switch:profiles:update',
     remove: 'open-switch:profiles:remove',
     selectConfigFile: 'open-switch:profiles:select-config-file',
+    selectBundleForImport: 'open-switch:profiles:select-bundle-for-import',
+    importBundle: 'open-switch:profiles:import-bundle',
+    discardBundleImport: 'open-switch:profiles:discard-bundle-import',
+    exportBundle: 'open-switch:profiles:export-bundle',
   },
   settings: {
     get: 'open-switch:settings:get',
@@ -66,6 +73,22 @@ export interface IpcInvokeContract {
   readonly [IPC_CHANNELS.profiles.selectConfigFile]: {
     readonly args: readonly []
     readonly value: ConfigFileSelection | null
+  }
+  readonly [IPC_CHANNELS.profiles.selectBundleForImport]: {
+    readonly args: readonly []
+    readonly value: BundleImportPreview | null
+  }
+  readonly [IPC_CHANNELS.profiles.importBundle]: {
+    readonly args: readonly [sessionId: string, profileKeys: readonly string[]]
+    readonly value: BundleImportResult
+  }
+  readonly [IPC_CHANNELS.profiles.discardBundleImport]: {
+    readonly args: readonly [sessionId: string]
+    readonly value: void
+  }
+  readonly [IPC_CHANNELS.profiles.exportBundle]: {
+    readonly args: readonly [profileIds: readonly VpnProfileId[]]
+    readonly value: BundleExportResult | null
   }
   readonly [IPC_CHANNELS.settings.get]: {
     readonly args: readonly []

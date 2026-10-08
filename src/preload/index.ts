@@ -21,6 +21,10 @@ const IPC_CHANNELS = {
     update: 'open-switch:profiles:update',
     remove: 'open-switch:profiles:remove',
     selectConfigFile: 'open-switch:profiles:select-config-file',
+    selectBundleForImport: 'open-switch:profiles:select-bundle-for-import',
+    importBundle: 'open-switch:profiles:import-bundle',
+    discardBundleImport: 'open-switch:profiles:discard-bundle-import',
+    exportBundle: 'open-switch:profiles:export-bundle',
   },
   settings: {
     get: 'open-switch:settings:get',
@@ -52,6 +56,13 @@ const profiles: OpenSwitchApi['profiles'] = Object.freeze({
     invoke(IPC_CHANNELS.profiles.update, profileId, input),
   remove: (profileId: VpnProfileId) => invoke(IPC_CHANNELS.profiles.remove, profileId),
   selectConfigFile: () => invoke(IPC_CHANNELS.profiles.selectConfigFile),
+  selectBundleForImport: () => invoke(IPC_CHANNELS.profiles.selectBundleForImport),
+  importBundle: (sessionId: string, profileKeys: readonly string[]) =>
+    invoke(IPC_CHANNELS.profiles.importBundle, sessionId, profileKeys),
+  discardBundleImport: (sessionId: string) =>
+    invoke(IPC_CHANNELS.profiles.discardBundleImport, sessionId),
+  exportBundle: (profileIds: readonly VpnProfileId[]) =>
+    invoke(IPC_CHANNELS.profiles.exportBundle, profileIds),
 })
 
 const settings: OpenSwitchApi['settings'] = Object.freeze({

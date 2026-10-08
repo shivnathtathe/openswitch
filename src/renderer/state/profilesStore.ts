@@ -1,6 +1,9 @@
 import type {
   ConfigFileSelection,
   CreateVpnProfileInput,
+  BundleExportResult,
+  BundleImportPreview,
+  BundleImportResult,
   UpdateVpnProfileInput,
   VpnProfile,
   VpnProfileId,
@@ -190,6 +193,84 @@ export async function selectConfigFile(): Promise<ConfigFileSelection | null> {
     const message = formatError(error, 'A configuration file could not be selected.')
     publish({ error: message })
     throw new Error(message)
+  }
+}
+
+export async function selectBundleForImport(): Promise<BundleImportPreview | null> {
+  const sequence = beginMutation()
+  try {
+    const result = await getOpenSwitchApi().profiles.selectBundleForImport()
+    if (!result.ok) {
+      if (sequence === mutationSequence) publish({ error: formatError(result.error) })
+      return null
+    }
+    return result.value
+  } catch (error) {
+    if (sequence === mutationSequence) {
+      publish({ error: formatError(error, 'The profile bundle could not be opened.') })
+    }
+    return null
+  } finally {
+    endMutation()
+  }
+}
+
+export async function importBundle(
+  sessionId: string,
+  profileKeys: readonly string[],
+): Promise<BundleImportResult | null> {
+  const sequence = beginMutation()
+  try {
+    const result = await getOpenSwitchApi().profiles.importBundle(sessionId, profileKeys)
+    if (!result.ok) {
+      if (sequence === mutationSequence) publish({ error: formatError(result.error) })
+      return null
+    }
+    dataSequence += 1
+    publish({ profiles: result.value.profiles })
+    return result.value
+  } catch (error) {
+    if (sequence === mutationSequence) {
+      publish({ error: formatError(error, 'The selected profiles could not be imported.') })
+    }
+    return null
+  } finally {
+    endMutation()
+  }
+}
+
+export async function discardBundleImport(sessionId: string): Promise<boolean> {
+  try {
+    const result = await getOpenSwitchApi().profiles.discardBundleImport(sessionId)
+    if (!result.ok) {
+      publish({ error: formatError(result.error) })
+      return false
+    }
+    return true
+  } catch (error) {
+    publish({ error: formatError(error, 'The temporary import could not be discarded.') })
+    return false
+  }
+}
+
+export async function exportBundle(
+  profileIds: readonly VpnProfileId[],
+): Promise<BundleExportResult | null> {
+  const sequence = beginMutation()
+  try {
+    const result = await getOpenSwitchApi().profiles.exportBundle(profileIds)
+    if (!result.ok) {
+      if (sequence === mutationSequence) publish({ error: formatError(result.error) })
+      return null
+    }
+    return result.value
+  } catch (error) {
+    if (sequence === mutationSequence) {
+      publish({ error: formatError(error, 'The profile bundle could not be exported.') })
+    }
+    return null
+  } finally {
+    endMutation()
   }
 }
 

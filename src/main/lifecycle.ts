@@ -6,6 +6,7 @@ import { IPC_CHANNELS } from '../shared/ipc'
 import { registerIpcHandlers } from './ipc/handlers'
 import type { MainServices } from './ipc/types'
 import { TrayService } from './tray'
+import { BundleService } from './bundles'
 
 export class MainLifecycle {
   private window: BrowserWindow | null = null
@@ -17,8 +18,11 @@ export class MainLifecycle {
   private closeNoticeShown = false
   private removeIpcHandlers: (() => void) | null = null
   private removeVpnListener: (() => void) | null = null
+  private readonly bundles: BundleService
 
-  constructor(private readonly services: MainServices) {}
+  constructor(private readonly services: MainServices) {
+    this.bundles = new BundleService(services.profiles, () => app.getPath('userData'))
+  }
 
   async start(): Promise<void> {
     if (!app.requestSingleInstanceLock()) {
@@ -87,6 +91,15 @@ export class MainLifecycle {
         await this.services.profiles.remove(profileId)
         await this.refreshMenus()
       },
+      previewBundle: (filePath) => this.bundles.preview(filePath),
+      importBundle: async (sessionId, profileKeys) => {
+        const imported = await this.bundles.import(sessionId, profileKeys)
+        await this.refreshMenus()
+        return imported
+      },
+      discardBundleImport: (sessionId) => this.bundles.discard(sessionId),
+      exportBundle: (profileIds, destinationPath) =>
+        this.bundles.export(profileIds, destinationPath),
       connect: (profileId) => this.connect(profileId),
       disconnect: () => this.disconnect(),
       getState: () => this.status,

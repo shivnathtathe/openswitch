@@ -1,5 +1,9 @@
 # Known Limitations
 
+- `.osch` supports format version 1 only and is limited to 100 profiles, 500 ZIP entries, 1 MB manifests/configs, 20 MB per dependency, and 100 MB total expanded data.
+- Bundles intentionally omit saved passwords. A password must be saved again after import when the VPN requires one.
+- OpenVPN supports more path-bearing directives and unusual token forms than the bundle format. Export supports the documented certificate/key directives and simple quoted or unquoted tokens; unsupported argument forms are rejected rather than copied ambiguously.
+
 - The Windows x64 installer bundles OpenVPN Community Edition 2.7.8 and requests administrator approval to install its networking components. Development runs and non-Windows builds still require OpenVPN separately.
 - The Windows application currently requests administrator elevation at launch so OpenVPN can configure its tunnel adapter. A dedicated least-privilege helper service is not yet implemented.
 - OpenVPN is retained when OpenSwitch is uninstalled because other applications may depend on it.

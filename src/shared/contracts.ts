@@ -47,6 +47,34 @@ export interface ConfigFileSelection {
   readonly fileName: string
 }
 
+export interface BundleProfilePreview {
+  readonly key: string
+  readonly name: string
+  readonly username: string
+  readonly includedFileCount: number
+  readonly containsPrivateKey: boolean
+}
+
+export interface BundleImportPreview {
+  readonly sessionId: string
+  readonly fileName: string
+  readonly profiles: readonly BundleProfilePreview[]
+}
+
+export interface BundleImportResult {
+  readonly importedCount: number
+  readonly profiles: readonly VpnProfile[]
+}
+
+export interface BundleExportResult {
+  readonly exportedCount: number
+  readonly fileName: string
+}
+
+export type ProfileBundlePreview = BundleImportPreview
+export type ProfileBundleImportResult = BundleImportResult
+export type ProfileBundleExportResult = BundleExportResult
+
 export type AppearanceTheme = 'system' | 'light' | 'dark'
 
 export interface AppSettings {

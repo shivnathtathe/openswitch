@@ -8,13 +8,14 @@ OpenSwitch is a focused Windows desktop client for importing OpenVPN profiles, s
 
 Download the latest precompiled Windows x64 installer:
 
-**[Download OpenSwitch 0.2.0 for Windows](https://github.com/shivnathtathe/openswitch/releases/download/v0.2.0/OpenSwitch-0.2.0-x64.exe)**
+**[Download OpenSwitch 0.3.0 for Windows](https://github.com/shivnathtathe/openswitch/releases/download/v0.3.0/OpenSwitch-0.3.0-x64.exe)**
 
 You can also browse [all releases](https://github.com/shivnathtathe/openswitch/releases). The installer is currently unsigned, so Windows may display an unrecognized publisher warning.
 
 ## Features
 
 - Import, edit, connect, disconnect, and remove local `.ovpn` profiles.
+- Import or export selected profiles as portable `.osch` bundles containing their configurations and local certificate/key dependencies.
 - Store passwords in the operating system credential vault through `keytar`.
 - Send credentials to OpenVPN through an in-memory loopback management channel.
 - Follow the system appearance or use an explicit light or dark theme.

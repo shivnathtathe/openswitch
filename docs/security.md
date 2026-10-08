@@ -15,10 +15,14 @@ The renderer is also outside the privileged trust boundary. Process creation, fi
 - Saved credentials are supplied through an ephemeral localhost-only OpenVPN management channel and are not written to plaintext authentication files.
 - OpenVPN output passes through a redactor for supplied credentials, auth-file paths, common credential fields, inline URL credentials, management password messages, and PEM private keys.
 - Shutdown attempts to disconnect OpenVPN before destroying the tray and windows.
+- Bundle file dialogs, archive paths, extraction, and persistence are main-process operations. Renderer IPC receives only an opaque import session and display metadata.
+- Bundle ZIP reads reject traversal, absolute/backslash/colon paths, Windows reserved names, case collisions, links, encryption, unsupported compression, excessive compression ratios, undeclared entries, and configured entry/count/expanded-size limits.
+- Bundle manifests and OpenVPN file references are strictly validated. Extraction is staged under a randomized user-data directory and renamed before a single profile metadata batch write.
+- Bundle export has no credential-vault dependency. It includes usernames but never passwords or keytar values.
 
 ## Residual risks
 
-- Profile paths are checked for an `.ovpn` suffix, but files are not parsed against a directive allowlist before OpenVPN reads them. Treat profiles as executable-equivalent input and inspect directives such as `script-security`, `up`, `down`, `route-up`, `ipchange`, `plugin`, and external file references.
+- Standalone `.ovpn` selection still references files in place. Profile creation rejects known code-execution/include directives, while `.osch` export/import additionally validates and packages supported local file references. This is a denylist boundary rather than a complete OpenVPN directive allowlist.
 - The application stores the username and the absolute profile path in the unencrypted `electron-store` profile database. Only the password is placed in the OS vault.
 - The OpenVPN management protocol is bound to loopback and accepts one client, but a sufficiently privileged local process remains outside the application's trust boundary.
 - Redaction is defense in depth, not proof that every future OpenVPN message format is covered. Review diagnostics before sharing them.
