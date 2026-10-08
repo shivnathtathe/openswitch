@@ -35,6 +35,9 @@ jobs:
       - name: Validate source
         run: npm run check
 
+      - name: Install artwork verification dependency
+        run: python -m pip install Pillow
+
       - name: Verify generated artwork
         run: |
           python scripts/generate-icons.py --verify-only
