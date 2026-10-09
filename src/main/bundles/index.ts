@@ -91,6 +91,7 @@ interface Token {
 }
 
 export class BundleService {
+  // Keep source paths in the main process; the renderer receives only opaque session IDs.
   private readonly sessions = new Map<string, PendingSession>()
 
   constructor(
